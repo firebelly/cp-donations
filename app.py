@@ -29,6 +29,7 @@ def donation():
   shopify.ShopifyResource.set_site(shop_url)
   shop = shopify.Shop.current
   variant = None
+  product = None
   message = ''
 
   if request.args.get('id'):
@@ -36,7 +37,7 @@ def donation():
   else:
     message = 'No product id sent.'
 
-  if request.args.get('amount'):
+  if product and request.args.get('amount'):
     # check if a variant exists with donation amount that we can reuse  
     for v in product.variants:
       if float(v.price) == float(request.args.get('amount')):
@@ -59,7 +60,7 @@ def donation():
       product.variants.append(variant)
       product.save()
       
-      # set variant var to saved variant
+      # set to saved variant
       variant = product.variants[-1]
   else:
     message = 'No amount sent.'
