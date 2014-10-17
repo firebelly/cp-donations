@@ -1,0 +1,3 @@
+SHOP_NAME = ''
+API_KEY = ''
+PASSWORD = ''
