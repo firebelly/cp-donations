@@ -1,51 +1,75 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, current_app
 import shopify, hashlib, time
+from functools import wraps
 
 app = Flask(__name__)
-app.config.from_object('config')
 app.debug = True
+app.config.from_object('config')
 
+def support_jsonp(f):
+    """Wraps JSONified output for JSONP"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        callback = request.args.get('callback', False)
+        if callback:
+            content = str(callback) + '(' + str(f().data) + ')'
+            return current_app.response_class(content, mimetype='application/json')
+        else:
+            return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/')
+def home(): 
+  return 'Hello! Nothing to see here.'
+  
 @app.route('/donation')
+@support_jsonp
 def donation():
   shop_url = "https://%s:%s@%s.myshopify.com/admin" % (app.config['API_KEY'], app.config['PASSWORD'], app.config['SHOP_NAME'])
   shopify.ShopifyResource.set_site(shop_url)
   shop = shopify.Shop.current
+  variant = None
+  message = ''
 
-  product = shopify.Product.find(request.get.id)
+  if request.args.get('id'):
+    product = shopify.Product.find(int(request.args.get('id')))
+  else:
+    message = 'No product id sent.'
 
-  # check if a variant exists with donation amount that we can reuse  
-  for v in product.variants:
-    if v.price == request.get.amount:
-      variant = v
+  if request.args.get('amount'):
+    # check if a variant exists with donation amount that we can reuse  
+    for v in product.variants:
+      if float(v.price) == float(request.args.get('amount')):
+        variant = v
 
-  if not variant:
-    # if we are running out of skus trash an old one
-    if len(product.variants) >= 245:
-      del product.variants[0]
+    if not variant:
+      # if we are running out of skus trash an old one
+      if len(product.variants) >= 245:
+        del product.variants[1]
 
-    # get hash for variant
-    hash = hashlib.sha1()
-    hash.update(str(time.time()))
-    donation_id = hash.hexdigest()
+      # get hash for variant
+      hash = hashlib.sha1()
+      hash.update(str(time.time()))
+      donation_id = hash.hexdigest()
 
-    # create new variant and associate with product
-    variant = shopify.Variant()
-    variant.price = request.get.amount
-    variant.option1 = donation_id
-    product.variants.append(variant)
-    product.save()
-    
-    # set variant var to saved variant
-    variant = product.variants[-1]
+      # create new variant and associate with product
+      variant = shopify.Variant()
+      variant.price = request.args.get('amount')
+      variant.option1 = donation_id
+      product.variants.append(variant)
+      product.save()
+      
+      # set variant var to saved variant
+      variant = product.variants[-1]
+  else:
+    message = 'No amount sent.'
 
   if variant:
     return jsonify(vid = variant.id,
                    message = 'success',
-                   callback = request.args.callback,
                    price = variant.price)
   else:
-    return jsonify(message = 'failure',
-                   callback = request.args.callback)
+    return jsonify(message = 'failure: %s' % message)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
