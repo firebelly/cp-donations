@@ -1,0 +1,11 @@
+Flask==0.10.1
+Jinja2==2.7.3
+MarkupSafe==0.23
+PyYAML==3.11
+ShopifyAPI==2.1.0
+Werkzeug==0.9.6
+itsdangerous==0.24
+pyactiveresource==2.1.0
+readline==6.2.4.1
+six==1.8.0
+wsgiref==0.1.2
