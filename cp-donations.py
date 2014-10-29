@@ -4,7 +4,7 @@ from functools import wraps
 import os
 
 app = Flask(__name__)
-app.debug = True
+app.debug = False
 
 def support_jsonp(f):
     """Wraps JSONified output for JSONP"""
