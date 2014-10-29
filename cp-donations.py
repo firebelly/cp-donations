@@ -1,17 +1,12 @@
 from flask import Flask, jsonify, request, current_app
 import shopify, hashlib, time
 from functools import wraps
-
 from flask.ext.appconfig import HerokuConfig
 
 def create_app(configfile=None):
     app = Flask(__name__)
     HerokuConfig(app, configfile)
     return app
-
-app = Flask(__name__)
-app.debug = True
-app.config.from_object('config')
 
 def support_jsonp(f):
     """Wraps JSONified output for JSONP"""
