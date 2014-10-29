@@ -1,1 +1,1 @@
-web: gunicorn cp-donations:create_app() --log-file -
+web: gunicorn cp-donations:app --log-file -
