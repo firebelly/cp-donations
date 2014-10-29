@@ -5,7 +5,6 @@ PyYAML==3.11
 ShopifyAPI==2.1.0
 Werkzeug==0.9.6
 argparse==1.2.1
-flask-appconfig==0.9.1
 gunicorn==19.1.1
 itsdangerous==0.24
 pyactiveresource==2.1.0

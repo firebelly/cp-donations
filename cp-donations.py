@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request, current_app
 import shopify, hashlib, time
 from functools import wraps
-from flask.ext.appconfig import HerokuConfig
 import os
 
 app = Flask(__name__)
