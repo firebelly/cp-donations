@@ -2,6 +2,13 @@ from flask import Flask, jsonify, request, current_app
 import shopify, hashlib, time
 from functools import wraps
 
+from flask.ext.appconfig import HerokuConfig
+
+def create_app(configfile=None):
+    app = Flask(__name__)
+    HerokuConfig(app, configfile)
+    return app
+
 app = Flask(__name__)
 app.debug = True
 app.config.from_object('config')
@@ -25,7 +32,7 @@ def home():
 @app.route('/donation')
 @support_jsonp
 def donation():
-  shop_url = "https://%s:%s@%s.myshopify.com/admin" % (app.config['API_KEY'], app.config['PASSWORD'], app.config['SHOP_NAME'])
+  shop_url = "https://%s:%s@%s.myshopify.com/admin" % (app.config['SHOPIFY_API_KEY'], app.config['SHOPIFY_API_PASSWORD'], app.config['SHOP_NAME'])
   shopify.ShopifyResource.set_site(shop_url)
   shop = shopify.Shop.current
   variant = None
